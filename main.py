@@ -84,7 +84,6 @@ def main():
         if file.type == "text/csv":
             doc = "csv"
             data = load_csv_data(file)
-            st.write(data)
             agent = create_csv_agent(OpenAI(temperature=0), 'uploaded_file.csv', verbose=True)
             st.dataframe(data)
 
