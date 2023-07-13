@@ -1,0 +1,7 @@
+langchain
+openai
+tiktoken
+pypdf
+streamlit
+apikey
+PyPDF2
