@@ -5,3 +5,4 @@ pypdf
 streamlit
 apikey
 PyPDF2
+pdf2image
