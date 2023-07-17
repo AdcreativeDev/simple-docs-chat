@@ -29,13 +29,6 @@ image = Image.open("csv_reader.jpg")
 st.image(image, caption='created by MJ')
 
 
-
-
-
-
-
-llm = OpenAI(temperature=0.2)
-
 def pdf_to_text(pdf_path):
     # Step 1: Convert PDF to images
     images = convert_from_path(pdf_path)
@@ -95,6 +88,7 @@ def main():
     if file is not None:
         if file.type == "text/csv":
             with st.spinner('Process Start ...'):
+                llm = OpenAI(temperature=0.2)
                 doc = "csv"
                 st.write('✔️ Start to upload file')
                 data = load_csv_data(file)
