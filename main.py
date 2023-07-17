@@ -14,7 +14,7 @@ from PIL import Image
 
 st.set_page_config(
     page_title="Document Chat",
-    page_icon="🧊",
+    page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -32,9 +32,6 @@ st.image(image, caption='created by MJ')
 
 
 
-system_openai_api_key = os.environ.get('OPENAI_API_KEY')
-system_openai_api_key = st.text_input(":key: OpenAI Key :", value=system_openai_api_key)
-os.environ["OPENAI_API_KEY"] = system_openai_api_key
 
 
 llm = OpenAI(temperature=0.2)
@@ -75,46 +72,76 @@ def load_pdf_data(uploaded_file):
     return text
 
 def main():
-    st.title("😀 :blue[Simple Chat With Documents]")
-    st.subheader('You can select file type : ( txt, csv , pdf ) ')
-    file = st.file_uploader("**Step 1 : Upload a file**", type=["csv", "txt", "pdf"])
+    st.title("😀 :blue[Ask your Text Document]")
+
+    system_openai_api_key = os.environ.get('OPENAI_API_KEY')
+    system_openai_api_key = st.text_input(":key: OpenAI Key :", value=system_openai_api_key)
+    os.environ["OPENAI_API_KEY"] = system_openai_api_key
+
+    with st.expander("Sample, click here to view"):
+        image = Image.open("txt_reader.png")
+        st.image(image, caption='sample')
+
+    st.subheader('You can select txt file: ')
+    file = st.file_uploader("**Step 1 : Upload a file**", type=["csv", "txt"])
 
 
     if file is not None:
         if file.type == "text/csv":
-            doc = "csv"
-            data = load_csv_data(file)
-            agent = create_csv_agent(OpenAI(temperature=0), 'uploaded_file.csv', verbose=True)
-            st.dataframe(data)
+            with st.spinner('Process Start ...'):
+                doc = "csv"
+                st.write('✔️ Start to upload file')
+                data = load_csv_data(file)
+                st.write('✔️ Upload Completed.')
+                agent = create_csv_agent(OpenAI(temperature=0), 'uploaded_file.csv', verbose=True)
+                st.write('✔️ Csv agent Created.')
+                st.write('✔️ Load file content.')
+                with st.expander("File Content, Click to View"):
+                    st.dataframe(data)
+
 
         elif file.type == "text/plain":
-            doc = "text"
-            data = load_txt_data(file)
-            st.caption("File Contnet:")
-            st.info(data)
-            loader = TextLoader('uploaded_file.txt')
-            index = VectorstoreIndexCreator().from_loaders([loader])
+            with st.spinner('Process Start ...'):
+                doc = "text"
+                st.write('✔️ Start to upload file')
+                data = load_txt_data(file)
+                st.write('✔️ Upload Completed.')
+                st.write('✔️ Load file content.')
+                with st.expander("File Content, Click to View"):
+                    st.info(data)
+                loader = TextLoader('uploaded_file.txt')
+                index = VectorstoreIndexCreator().from_loaders([loader])
+                st.write('✔️ Vector Store Created.')
 
-        elif file.type == "application/pdf":
-            doc = "text"
-            data = load_pdf_data(file)
-            loader = TextLoader('output.txt')
-            index = VectorstoreIndexCreator().from_loaders([loader])
+
+        # elif file.type == "application/pdf":
+        #     with st.spinner('Process Start ...'):
+        #         doc = "text"
+        #         data = load_pdf_data(file)
+        #         loader = TextLoader('output.txt')
+        #         index = VectorstoreIndexCreator().from_loaders([loader])
 
         # do something with the data
 
 
         question = st.text_input("**Step 2 - Enter your question here:**")
-        submit_button = st.button('Submit')
+        submit_button = st.button('Submit', type='primary')
 
         if submit_button:
             if doc == "text":
-                response = index.query(question)
+                with st.spinner('Query the file  ...'):
+                    response = index.query(question)
+                    st.write('✔️ Query Completed.')
+
+
             else:
-                response = agent.run(question)
+                with st.spinner('Query the file  ...'):
+                    response = agent.run(question)
+                    st.write('✔️ Query Completed.')
 
             if response:
-                st.write(response)
+                st.subheader('Query Results:')
+                st.info(response)
 
 
 if __name__ == "__main__":
